@@ -1,22 +1,27 @@
-<svg width="640" height="280" viewBox="0 0 640 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="640" height="260" viewBox="0 0 640 260" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F7D373" />
-      <stop offset="50%" stop-color="#D7A63A" />
-      <stop offset="100%" stop-color="#A56E14" />
+      <stop offset="0%" stop-color="#F7D373"/>
+      <stop offset="50%" stop-color="#D7A63A"/>
+      <stop offset="100%" stop-color="#A56E14"/>
+    </linearGradient>
+    <linearGradient id="redGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#C81919"/>
+      <stop offset="100%" stop-color="#8E0F0F"/>
     </linearGradient>
   </defs>
 
   <g>
-    <circle cx="320" cy="140" r="126" stroke="url(#gold)" stroke-width="8" fill="#F8F0E8"/>
-    <path d="M212 118C217 86 242 70 275 74C291 60 315 56 334 68C351 56 382 58 398 74C423 74 444 92 446 118C450 142 431 163 402 166C391 182 374 192 354 192H278C251 192 228 178 217 158C199 153 189 138 191 118H212Z" fill="#B51414"/>
-    <path d="M247 121C258 100 279 90 301 90C318 88 334 93 348 105C360 84 382 74 404 79C421 84 434 99 435 117C426 110 412 102 393 99C374 96 356 102 346 116C334 109 316 107 300 111C279 116 260 128 247 121Z" fill="#F8F0E8" opacity="0.55"/>
-    <path d="M285 116L223 141L247 174L311 143L285 116Z" fill="#F8F0E8" opacity="0.85"/>
-    <path d="M315 113L347 84L392 119L347 153L315 113Z" fill="#F8F0E8" opacity="0.7"/>
-    <path d="M238 162L282 149L295 167L258 182L238 162Z" fill="#B51414"/>
-    <path d="M343 166L400 155L392 179L340 180L343 166Z" fill="#B51414"/>
+    <circle cx="120" cy="130" r="88" fill="#F7F0E7" stroke="url(#gold)" stroke-width="8"/>
+    <circle cx="120" cy="130" r="72" fill="url(#redGlow)" opacity="0.95"/>
 
-    <text x="320" y="160" text-anchor="middle" font-family="Georgia, serif" font-size="64" font-weight="700" fill="#B51414" letter-spacing="1">Salton</text>
-    <text x="320" y="208" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#1A1A1A" letter-spacing="4">BUFFET &amp; MARMITARIA</text>
+    <path d="M148 90C136 78 118 72 100 72C78 72 57 82 47 98C39 109 39 122 49 131C58 140 71 144 87 146L101 148C117 150 127 156 131 167C135 178 128 190 112 196C95 202 72 201 53 192L42 187" stroke="url(#gold)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M93 97C108 87 122 87 136 94C149 100 156 112 156 124C156 139 143 149 125 152L99 156C85 158 75 164 75 175C75 187 88 194 104 194C121 194 136 188 148 176" stroke="#F7F0E7" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <path d="M176 86H244" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M176 174H244" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+
+    <text x="265" y="126" fill="#111111" font-family="Georgia, 'Times New Roman', serif" font-size="58" font-weight="700" letter-spacing="1">Salton</text>
+    <text x="266" y="165" fill="#3A2F2A" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="4">BUFFET &amp; MARMITARIA</text>
   </g>
 </svg>
