@@ -1,0 +1,12 @@
+node_modules/
+data/
+.imgtool/
+dist/
+logs/
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+public/logo.optimized.png
+public/logo.webp

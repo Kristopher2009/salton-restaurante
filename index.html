@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salton Buffet & Marmitaria</title>
+    <meta name="description" content="Salton Buffet & Marmitaria — marmitas de tamanho P, M e G e bebidas em promoção, com pedido direto para o WhatsApp." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="public/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand-wrap">
+          <img src="/logo.png" alt="Logo do Salton Buffet & Marmitaria" class="brand-logo" onerror="this.onerror=null;this.src='/logo.svg'" />
+        </div>
+        <nav>
+          <a href="#cardapio">Cardápio</a>
+          <a href="#pedidos">Pedidos</a>
+          <a href="#sobre">Sobre</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <span class="eyebrow">Delícias que fazem a diferença</span>
+            <h1>Salton Buffet & Marmitaria</h1>
+            <p>
+              Marmitas com sabor caseiro, qualidade e atendimento rápido. Peça sua marmita favorita
+              e envie o pedido direto para o WhatsApp do restaurante.
+            </p>
+            <div class="hero-actions">
+              <a href="#cardapio" class="primary-btn">Ver cardápio</a>
+              <a href="https://wa.me/554792637239" target="_blank" class="secondary-btn">Falar no WhatsApp</a>
+            </div>
+            <ul class="highlights">
+              <li>Marmitas P, M e G</li>
+              <li>Bebidas em promoção</li>
+              <li>Pedido direto ao dono</li>
+            </ul>
+          </div>
+          <div class="hero-plate">
+            <div class="plate-card logo-only">
+              <img src="/logo.png" alt="Logo Salton" class="hero-logo" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cardapio" class="menu-section">
+        <div class="container">
+          <div class="section-heading">
+            <span class="eyebrow dark">Cardápio</span>
+            <h2>Escolha sua marmita ou bebida</h2>
+          </div>
+
+          <div class="tabs" aria-label="Categorias do cardápio">
+            <button class="tab-btn active" data-tab="marmita" type="button">Marmitas</button>
+            <button class="tab-btn" data-tab="bebida" type="button">Bebidas</button>
+          </div>
+
+          <div class="menu-grid" id="menuGrid"></div>
+        </div>
+      </section>
+
+      <section id="pedidos" class="order-section">
+        <div class="container order-wrap">
+          <div class="order-summary">
+            <h3>Seu pedido</h3>
+            <ul id="cart-items">
+              <li class="empty-cart">Nenhum item adicionado ainda.</li>
+            </ul>
+            <div class="total-line">
+              <span>Total</span>
+              <strong id="total-price">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <form id="order-form" class="order-form">
+            <h3>Finalizar pedido</h3>
+            <label>
+              Nome
+              <input type="text" id="customerName" name="customerName" placeholder="Seu nome" required />
+            </label>
+            <!-- Campo de telefone removido; mantido Nome e Observações -->
+            <label>
+              Observações
+              <textarea id="notes" name="notes" rows="4" placeholder="Ex.: sem cebola, bem passado, etc."></textarea>
+            </label>
+            <button type="submit" class="submit-btn">Enviar pedido para o WhatsApp</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="sobre" class="about-section">
+        <div class="container about-box">
+          <div>
+            <span class="eyebrow dark">Sobre nós</span>
+            <h2>Comida gostosa, serviço rápido e qualidade no prato.</h2>
+          </div>
+          <p>
+            O Salton Buffet & Marmitaria nasceu para servir refeições saborosas, bem servidas e feitas com atenção aos detalhes.
+            Aqui você encontra marmitas em tamanhos P, M e G, além de refrigerantes para acompanhar seu almoço ou jantar.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p>© 2026 Salton Buffet & Marmitaria</p>
+        <a href="https://wa.me/554792637239" target="_blank">WhatsApp: (47) 9263-7239</a>
+      </div>
+    </footer>
+
+    <script src="public/script.js"></script>
+  </body>
+</html>
