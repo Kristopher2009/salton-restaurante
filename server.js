@@ -20,10 +20,12 @@ const pool = new Pool({
 
 // Tipos de carne disponíveis
 const meatTypes = [
-  { id: 1, name: 'Carne Bovina (Bife)', slug: 'bife' },
-  { id: 2, name: 'Carne Suína', slug: 'suina' },
-  { id: 3, name: 'Frango Milanesa', slug: 'frango_milanesa' },
-  { id: 4, name: 'Peixe', slug: 'peixe' }
+  { id: 1, name: 'Bife', slug: 'bife' },
+  { id: 2, name: 'Sassame', slug: 'sassame' },
+  { id: 3, name: 'Peixe', slug: 'peixe' },
+  { id: 4, name: 'Ovo', slug: 'ovo' },
+  { id: 5, name: 'Porco', slug: 'porco' },
+  { id: 6, name: 'Carne de panela', slug: 'carne_de_panela' }
 ];
 
 const initialProducts = [
@@ -43,17 +45,23 @@ const initialVariants = [
   { product_id: 1, size: 'P', meat_type_id: 1, price: 22.0 },
   { product_id: 1, size: 'P', meat_type_id: 2, price: 20.0 },
   { product_id: 1, size: 'P', meat_type_id: 3, price: 18.0 },
-  { product_id: 1, size: 'P', meat_type_id: 4, price: 25.0 },
+  { product_id: 1, size: 'P', meat_type_id: 4, price: 18.0 },
+  { product_id: 1, size: 'P', meat_type_id: 5, price: 20.0 },
+  { product_id: 1, size: 'P', meat_type_id: 6, price: 24.0 },
   // Marmita M
   { product_id: 1, size: 'M', meat_type_id: 1, price: 28.0 },
   { product_id: 1, size: 'M', meat_type_id: 2, price: 26.0 },
   { product_id: 1, size: 'M', meat_type_id: 3, price: 24.0 },
-  { product_id: 1, size: 'M', meat_type_id: 4, price: 30.0 },
+  { product_id: 1, size: 'M', meat_type_id: 4, price: 24.0 },
+  { product_id: 1, size: 'M', meat_type_id: 5, price: 26.0 },
+  { product_id: 1, size: 'M', meat_type_id: 6, price: 30.0 },
   // Marmita G
   { product_id: 1, size: 'G', meat_type_id: 1, price: 35.0 },
   { product_id: 1, size: 'G', meat_type_id: 2, price: 33.0 },
   { product_id: 1, size: 'G', meat_type_id: 3, price: 31.0 },
-  { product_id: 1, size: 'G', meat_type_id: 4, price: 38.0 }
+  { product_id: 1, size: 'G', meat_type_id: 4, price: 31.0 },
+  { product_id: 1, size: 'G', meat_type_id: 5, price: 33.0 },
+  { product_id: 1, size: 'G', meat_type_id: 6, price: 38.0 }
 ];
 
 // Inicializar banco de dados
@@ -122,12 +130,19 @@ async function initDatabase() {
       )
     `);
 
-    // Inserir tipos de carne se não existirem
+    // Atualizar slugs antigos antes de aplicar os novos tipos
+    await pool.query(`
+      UPDATE meat_types
+      SET slug = 'legacy-' || id
+      WHERE id BETWEEN 1 AND 6
+    `);
+
+    // Inserir ou atualizar tipos de carne
     for (const meat of meatTypes) {
       await pool.query(
         `INSERT INTO meat_types (id, name, slug) 
          VALUES ($1, $2, $3) 
-         ON CONFLICT (slug) DO NOTHING`,
+         ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug`,
         [meat.id, meat.name, meat.slug]
       );
     }

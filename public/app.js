@@ -147,7 +147,7 @@ function showMeatAndSizeSelector(productId) {
 
   const sizes = Object.keys(sizeGroups).sort();
   let currentSize = sizes[0];
-  let currentMeatType = sizeGroups[currentSize][0];
+  let selectedVariant = sizeGroups[currentSize][0];
 
   // Criar modal
   const modal = document.createElement('div');
@@ -165,13 +165,8 @@ function showMeatAndSizeSelector(productId) {
 
       <div class="meat-selector">
         <label>Tipo de Carne:</label>
-        <select id="meat-select">
-          ${sizeGroups[currentSize].map(v => `
-            <option value="${v.id}" data-price="${v.price}" data-meat="${v.meat_type_name}">
-              ${v.meat_type_name} - ${formatCurrency(v.price)}
-            </option>
-          `).join('')}
-        </select>
+        <div class="meat-tabs" id="meat-tabs" role="tablist" aria-label="Tipos de carne"></div>
+        <p class="selected-meat" id="selected-meat"></p>
       </div>
 
       <div class="modal-actions">
@@ -183,28 +178,51 @@ function showMeatAndSizeSelector(productId) {
 
   document.body.appendChild(modal);
 
+  const meatTabs = document.getElementById('meat-tabs');
+  const selectedMeat = document.getElementById('selected-meat');
+
+  const renderMeatTabs = (size) => {
+    const variantsForSize = sizeGroups[size];
+    selectedVariant = variantsForSize[0];
+    meatTabs.innerHTML = variantsForSize.map((variant, index) => `
+      <button
+        type="button"
+        class="meat-tab${index === 0 ? ' active' : ''}"
+        data-variant-id="${variant.id}"
+        role="tab"
+        aria-selected="${index === 0}"
+      >${variant.meat_type_name}</button>
+    `).join('');
+    selectedMeat.textContent = `${selectedVariant.meat_type_name} - ${formatCurrency(selectedVariant.price)}`;
+
+    meatTabs.querySelectorAll('.meat-tab').forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedVariant = variantsForSize.find(variant => variant.id === Number(button.dataset.variantId));
+        meatTabs.querySelectorAll('.meat-tab').forEach(tab => {
+          const isActive = tab === button;
+          tab.classList.toggle('active', isActive);
+          tab.setAttribute('aria-selected', isActive);
+        });
+        selectedMeat.textContent = `${selectedVariant.meat_type_name} - ${formatCurrency(selectedVariant.price)}`;
+      });
+    });
+  };
+
+  renderMeatTabs(currentSize);
+
   // Evento para mudar tamanho
   document.getElementById('size-select').addEventListener('change', (e) => {
     const selectedSize = e.target.value;
-    const meatSelect = document.getElementById('meat-select');
-    const variantsForSize = sizeGroups[selectedSize];
-
-    meatSelect.innerHTML = variantsForSize.map(v => `
-      <option value="${v.id}" data-price="${v.price}" data-meat="${v.meat_type_name}">
-        ${v.meat_type_name} - ${formatCurrency(v.price)}
-      </option>
-    `).join('');
+    currentSize = selectedSize;
+    renderMeatTabs(currentSize);
   });
 
   // Confirmar seleção
   document.getElementById('confirm-btn').addEventListener('click', () => {
     const sizeSelect = document.getElementById('size-select');
-    const meatSelect = document.getElementById('meat-select');
-    const selectedOption = meatSelect.options[meatSelect.selectedIndex];
-
-    const variantId = Number(selectedOption.value);
-    const price = Number(selectedOption.dataset.price);
-    const meatType = selectedOption.dataset.meat;
+    const variantId = Number(selectedVariant.id);
+    const price = Number(selectedVariant.price);
+    const meatType = selectedVariant.meat_type_name;
     const size = sizeSelect.value;
 
     addItemToCart(variantId, 'Marmita', price, meatType, size, productId);
@@ -276,23 +294,3 @@ loadMeatTypesAndVariants().then(() => {
   renderMenu('marmita');
   updateCart();
 });
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Não foi possível registrar o pedido.');
-    }
-
-    alert('Pedido salvo e encaminhado para o WhatsApp do restaurante!');
-    window.open(data.whatsappUrl, '_blank');
-
-    selectedItems.clear();
-    updateCart();
-    event.target.reset();
-  } catch (error) {
-    alert(error.message || 'Erro ao finalizar pedido.');
-  }
-});
-
-updateCart();
