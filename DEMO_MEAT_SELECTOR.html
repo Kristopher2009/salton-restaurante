@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo - Seletor de Carne | Salton Buffet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #d7a63a;
+      --gold-dark: #b9861d;
+      --red: #b51414;
+      --red-dark: #8f0d0d;
+      --black: #0d0d0d;
+      --white: #ffffff;
+      --soft: #f8f0df;
+      --gray: #3c3c3c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f0eb;
+      color: var(--black);
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--red);
+      font-family: 'Cinzel', serif;
+    }
+
+    .demo-section {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-bottom: 24px;
+      color: var(--red);
+      font-size: 1.4rem;
+    }
+
+    /* Card de Marmita */
+    .product-card {
+      background: linear-gradient(135deg, var(--soft) 0%, #f0e8dd 100%);
+      border-radius: 16px;
+      padding: 24px;
+      border: 2px solid rgba(215, 166, 58, 0.2);
+      max-width: 300px;
+      margin-bottom: 24px;
+    }
+
+    .product-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      background: var(--red);
+      color: var(--white);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .size {
+      background: rgba(215, 166, 58, 0.2);
+      color: var(--black);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .product-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: var(--black);
+    }
+
+    .product-card p {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .product-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product-footer strong {
+      font-size: 1.3rem;
+      color: var(--red);
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--black);
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(215, 166, 58, 0.3);
+    }
+
+    /* Modal de Seleção de Carne */
+    .meat-selector-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .meat-selector-modal.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .meat-selector-content {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 400px;
+      width: min(400px, calc(100% - 32px));
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(40px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .meat-selector-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      color: var(--black);
+      text-align: center;
+    }
+
+    .size-selector,
+    .meat-selector {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .size-selector label,
+    .meat-selector label {
+      font-weight: 700;
+      color: var(--black);
+    }
+
+    .size-selector select,
+    .meat-selector select {
+      padding: 12px 14px;
+      border: 2px solid rgba(215, 166, 58, 0.3);
+      border-radius: 12px;
+      background: #fffaf4;
+      color: var(--black);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .size-selector select:hover,
+    .meat-selector select:hover,
+    .size-selector select:focus,
+    .meat-selector select:focus {
+      border-color: var(--gold);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(215, 166, 58, 0.1);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: var(--black);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(215, 166, 58, 0.3);
+    }
+
+    .secondary-btn {
+      background: #ece3d7;
+      color: var(--black);
+    }
+
+    .secondary-btn:hover {
+      background: #e0d5c7;
+    }
+
+    .info-box {
+      background: #e8f4fd;
+      border-left: 4px solid #0066cc;
+      padding: 16px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+    }
+
+    .info-box strong {
+      color: #0066cc;
+    }
+
+    .cart-demo {
+      background: #f9f9f9;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .cart-demo h4 {
+      margin-bottom: 12px;
+      color: var(--red);
+    }
+
+    .cart-item {
+      padding: 12px;
+      background: var(--white);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .instructions {
+      background: #fff8e1;
+      border-left: 4px solid #ffc107;
+      padding: 16px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+    }
+
+    .step {
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .step strong {
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🍖 Demonstração - Seletor de Carne</h1>
+
+    <div class="demo-section">
+      <div class="info-box">
+        <strong>ℹ️ DEMO:</strong> Clique no botão "Escolher" abaixo para ver o modal de seleção de carne funcionando!
+      </div>
+
+      <h2>1️⃣ Card de Marmita (antes de clicar)</h2>
+      
+      <div class="product-card">
+        <div class="product-top">
+          <span class="tag">Marmita</span>
+          <span class="size">P, M, G</span>
+        </div>
+        <h3>Marmita</h3>
+        <p>Marmita com sua escolha de carne</p>
+        <div class="product-footer">
+          <strong>A partir de R$ 18,00</strong>
+          <button class="add-btn" onclick="openMeatSelector()">Escolher</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>2️⃣ Como Funciona o Modal</h2>
+      
+      <div class="instructions">
+        <div class="step"><strong>Passo 1:</strong> Clique no botão "Escolher" acima</div>
+        <div class="step"><strong>Passo 2:</strong> Um modal aparecerá com dois seletores</div>
+        <div class="step"><strong>Passo 3:</strong> Escolha o tamanho (P, M ou G)</div>
+        <div class="step"><strong>Passo 4:</strong> Escolha o tipo de carne (veja os preços diferentes!)</div>
+        <div class="step"><strong>Passo 5:</strong> Clique "Adicionar ao Carrinho"</div>
+      </div>
+
+      <h3>Tipos de Carne Disponíveis:</h3>
+      <ul style="margin-top: 16px; margin-left: 24px; line-height: 1.8;">
+        <li><strong>🐄 Carne Bovina (Bife)</strong> - Premium - Preços: R$ 22,00 (P) / R$ 28,00 (M) / R$ 35,00 (G)</li>
+        <li><strong>🐷 Carne Suína</strong> - Normal - Preços: R$ 20,00 (P) / R$ 26,00 (M) / R$ 33,00 (G)</li>
+        <li><strong>🍗 Frango Milanesa</strong> - Mais Barato - Preços: R$ 18,00 (P) / R$ 24,00 (M) / R$ 31,00 (G)</li>
+        <li><strong>🐟 Peixe</strong> - Premium - Preços: R$ 25,00 (P) / R$ 30,00 (M) / R$ 38,00 (G)</li>
+      </ul>
+    </div>
+
+    <div class="demo-section">
+      <h2>3️⃣ Exemplo de Carrinho Preenchido</h2>
+      
+      <div class="cart-demo">
+        <h4>🛒 Seu Pedido</h4>
+        <div class="cart-item">
+          <span>Marmita - P (Carne Suína) x1</span>
+          <strong>R$ 20,00</strong>
+        </div>
+        <div class="cart-item">
+          <span>Marmita - M (Carne Bovina (Bife)) x2</span>
+          <strong>R$ 56,00</strong>
+        </div>
+        <div class="cart-item">
+          <span>Coca-Cola 350ml x1</span>
+          <strong>R$ 8,00</strong>
+        </div>
+        <hr style="margin: 12px 0;">
+        <div class="cart-item" style="font-weight: bold;">
+          <span>Total:</span>
+          <strong style="font-size: 1.2rem;">R$ 84,00</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>4️⃣ Mensagem WhatsApp que será Enviada</h2>
+      
+      <div style="background: #dcf8c6; padding: 20px; border-radius: 12px; border-left: 4px solid #25d366;">
+        <p style="color: #0a5a3a; line-height: 1.8;">
+          <strong>Olá! Gostaria de fazer o seguinte pedido:</strong><br><br>
+          <strong>Cliente:</strong> João Silva<br>
+          <strong>Itens:</strong> Marmita P (Carne Suína) x1, Marmita M (Carne Bovina (Bife)) x2, Coca-Cola 350ml x1<br>
+          <strong>Total:</strong> R$ 84,00<br>
+          <strong>Observações:</strong> Bem passado<br><br>
+          <strong>Pedido nº 42</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>5️⃣ Estrutura de Dados (Backend)</h2>
+      
+      <p style="margin-bottom: 16px;">O servidor envia essas informações:</p>
+      
+      <pre style="background: #f5f5f5; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
+GET /api/products
+[
+  {
+    "id": 1,
+    "name": "Marmita",
+    "category": "marmita",
+    "description": "Marmita com sua escolha de carne",
+    "variants": [
+      { "id": 1, "size": "P", "meat_type_name": "Carne Bovina (Bife)", "price": "22.00" },
+      { "id": 2, "size": "P", "meat_type_name": "Carne Suína", "price": "20.00" },
+      { "id": 3, "size": "P", "meat_type_name": "Frango Milanesa", "price": "18.00" },
+      { "id": 4, "size": "P", "meat_type_name": "Peixe", "price": "25.00" },
+      { "id": 5, "size": "M", "meat_type_name": "Carne Bovina (Bife)", "price": "28.00" },
+      ...
+    ]
+  }
+]
+      </pre>
+    </div>
+
+    <div class="demo-section">
+      <h2>6️⃣ O que é Enviado para o Servidor</h2>
+      
+      <pre style="background: #f5f5f5; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
+POST /api/orders
+{
+  "customerName": "João Silva",
+  "customerPhone": "",
+  "notes": "Bem passado",
+  "items": [
+    {
+      "productId": 1,
+      "variantId": 2,
+      "productName": "Marmita",
+      "quantity": 1
+    },
+    {
+      "productId": 1,
+      "variantId": 5,
+      "productName": "Marmita",
+      "quantity": 2
+    },
+    {
+      "productId": 4,
+      "variantId": null,
+      "productName": "Coca-Cola 350ml",
+      "quantity": 1
+    }
+  ]
+}
+      </pre>
+    </div>
+
+  </div>
+
+  <!-- MODAL DINÂMICO -->
+  <div class="meat-selector-modal" id="meatModal">
+    <div class="meat-selector-content">
+      <h3>Escolha o Tamanho e Tipo de Carne</h3>
+      
+      <div class="size-selector">
+        <label>Tamanho:</label>
+        <select id="sizeSelect" onchange="updateMeatOptions()">
+          <option value="P">P - Pequeno</option>
+          <option value="M">M - Médio</option>
+          <option value="G">G - Grande</option>
+        </select>
+      </div>
+
+      <div class="meat-selector">
+        <label>Tipo de Carne:</label>
+        <select id="meatSelect">
+          <option value="1" data-price="22.0">🐄 Carne Bovina (Bife) - R$ 22,00</option>
+          <option value="2" data-price="20.0">🐷 Carne Suína - R$ 20,00</option>
+          <option value="3" data-price="18.0">🍗 Frango Milanesa - R$ 18,00</option>
+          <option value="4" data-price="25.0">🐟 Peixe - R$ 25,00</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="primary-btn" onclick="addToCart()">Adicionar ao Carrinho</button>
+        <button class="secondary-btn" onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const meatPrices = {
+      P: {
+        '1': 22.0,  // Bife
+        '2': 20.0,  // Suína
+        '3': 18.0,  // Frango
+        '4': 25.0   // Peixe
+      },
+      M: {
+        '1': 28.0,
+        '2': 26.0,
+        '3': 24.0,
+        '4': 30.0
+      },
+      G: {
+        '1': 35.0,
+        '2': 33.0,
+        '3': 31.0,
+        '4': 38.0
+      }
+    };
+
+    const meatNames = {
+      '1': 'Carne Bovina (Bife)',
+      '2': 'Carne Suína',
+      '3': 'Frango Milanesa',
+      '4': 'Peixe'
+    };
+
+    function openMeatSelector() {
+      document.getElementById('meatModal').classList.add('active');
+      console.log('✅ Modal aberto!');
+    }
+
+    function closeModal() {
+      document.getElementById('meatModal').classList.remove('active');
+      console.log('❌ Modal fechado');
+    }
+
+    function updateMeatOptions() {
+      const size = document.getElementById('sizeSelect').value;
+      const meatSelect = document.getElementById('meatSelect');
+      
+      const options = [
+        { value: '1', price: meatPrices[size]['1'] },
+        { value: '2', price: meatPrices[size]['2'] },
+        { value: '3', price: meatPrices[size]['3'] },
+        { value: '4', price: meatPrices[size]['4'] }
+      ];
+
+      meatSelect.innerHTML = options.map(opt => `
+        <option value="${opt.value}" data-price="${opt.price}">
+          ${opt.value === '1' ? '🐄' : opt.value === '2' ? '🐷' : opt.value === '3' ? '🍗' : '🐟'} 
+          ${meatNames[opt.value]} - R$ ${opt.price.toFixed(2).replace('.', ',')}
+        </option>
+      `).join('');
+    }
+
+    function addToCart() {
+      const size = document.getElementById('sizeSelect').value;
+      const meatSelect = document.getElementById('meatSelect');
+      const selectedOption = meatSelect.options[meatSelect.selectedIndex];
+      const meatId = selectedOption.value;
+      const price = selectedOption.dataset.price;
+      const meatName = meatNames[meatId];
+
+      alert(`✅ Adicionado ao carrinho:\n\nMarmita - ${size} (${meatName})\nPreço: R$ ${parseFloat(price).toFixed(2).replace('.', ',')}`);
+      console.log('Item adicionado:', { size, meatName, price });
+      
+      closeModal();
+    }
+
+    // Fechar modal ao clicar fora
+    document.getElementById('meatModal').addEventListener('click', (e) => {
+      if (e.target.id === 'meatModal') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -67,24 +67,24 @@
             <button class="tab-btn" data-tab="bebida" type="button">Bebidas</button>
           </div>
 
-          <div class="menu-grid">
+          <div class="menu-grid" id="menuGrid">
             <% products.marmita.forEach((item) => { %>
-              <article class="product-card" data-category="marmita">
+              <article class="product-card" data-category="marmita" data-product-id="<%= item.id %>">
                 <div class="product-top">
                   <span class="tag">Marmita</span>
-                  <span class="size"><%= item.size %></span>
+                  <span class="size">P, M, G</span>
                 </div>
                 <h3><%= item.name %></h3>
                 <p><%= item.description %></p>
                 <div class="product-footer">
-                  <strong>R$ <%= Number(item.price).toFixed(2).replace('.', ',') %></strong>
-                  <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>" data-price="<%= item.price %>">Adicionar</button>
+                  <strong>A partir de R$ 18,00</strong>
+                  <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>">Escolher</button>
                 </div>
               </article>
             <% }) %>
 
             <% products.bebida.forEach((item) => { %>
-              <article class="product-card hidden" data-category="bebida">
+              <article class="product-card hidden" data-category="bebida" data-product-id="<%= item.id %>">
                 <div class="product-top">
                   <span class="tag bebida">Bebida</span>
                   <span class="size"><%= item.size %></span>
@@ -93,7 +93,7 @@
                 <p><%= item.description %></p>
                 <div class="product-footer">
                   <strong>R$ <%= Number(item.price).toFixed(2).replace('.', ',') %></strong>
-                  <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>" data-price="<%= item.price %>">Adicionar</button>
+                  <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>" data-price="<%= item.price %>" data-size="<%= item.size %>">Adicionar</button>
                 </div>
               </article>
             <% }) %>

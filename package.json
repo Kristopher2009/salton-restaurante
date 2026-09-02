@@ -1,14 +1,19 @@
 {
   "name": "salton-buffet-site",
   "version": "1.0.0",
-  "description": "Site do restaurante Salton Buffet & Marmitaria com pedidos por WhatsApp e banco de dados local",
+  "description": "Site do restaurante Salton Buffet & Marmitaria com pedidos por WhatsApp e banco de dados PostgreSQL",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.19.2",
-    "sqlite3": "^6.0.1"
+    "pg": "^8.11.3",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

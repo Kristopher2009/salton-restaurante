@@ -1,0 +1,146 @@
+<!-- Exemplo de como o modal de seleção de carne aparece -->
+
+<!-- ANTES DE CLICAR NO BOTÃO "Escolher" -->
+<!-- O card mostra: -->
+<article class="product-card" data-category="marmita" data-product-id="1">
+  <div class="product-top">
+    <span class="tag">Marmita</span>
+    <span class="size">P, M, G</span>
+  </div>
+  <h3>Marmita</h3>
+  <p>Marmita com sua escolha de carne</p>
+  <div class="product-footer">
+    <strong>A partir de R$ 18,00</strong>
+    <button type="button" class="add-btn" data-id="1" data-name="Marmita">Escolher</button>
+  </div>
+</article>
+
+<!-- DEPOIS DE CLICAR NO BOTÃO "Escolher" -->
+<!-- Um modal DINÂMICO aparece com esta estrutura: -->
+
+<div class="meat-selector-modal">
+  <div class="meat-selector-content">
+    <h3>Escolha o Tamanho e Tipo de Carne</h3>
+    
+    <div class="size-selector">
+      <label>Tamanho:</label>
+      <select id="size-select">
+        <option value="P">P</option>
+        <option value="M">M</option>
+        <option value="G">G</option>
+      </select>
+    </div>
+
+    <div class="meat-selector">
+      <label>Tipo de Carne:</label>
+      <select id="meat-select">
+        <option value="1" data-price="22.0" data-meat="Carne Bovina (Bife)">
+          Carne Bovina (Bife) - R$ 22,00
+        </option>
+        <option value="2" data-price="20.0" data-meat="Carne Suína">
+          Carne Suína - R$ 20,00
+        </option>
+        <option value="3" data-price="18.0" data-meat="Frango Milanesa">
+          Frango Milanesa - R$ 18,00
+        </option>
+        <option value="4" data-price="25.0" data-meat="Peixe">
+          Peixe - R$ 25,00
+        </option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button id="confirm-btn" class="primary-btn">Adicionar ao Carrinho</button>
+      <button id="cancel-btn" class="secondary-btn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUANDO O CLIENTE MUDA PARA TAMANHO M -->
+<!-- O seletor de carne mostra os preços para M: -->
+
+<option value="5" data-price="28.0" data-meat="Carne Bovina (Bife)">
+  Carne Bovina (Bife) - R$ 28,00
+</option>
+<option value="6" data-price="26.0" data-meat="Carne Suína">
+  Carne Suína - R$ 26,00
+</option>
+<option value="7" data-price="24.0" data-meat="Frango Milanesa">
+  Frango Milanesa - R$ 24,00
+</option>
+<option value="8" data-price="30.0" data-meat="Peixe">
+  Peixe - R$ 30,00
+</option>
+
+<!-- DEPOIS DE ADICIONAR AO CARRINHO -->
+<!-- O item aparece no resumo do pedido assim: -->
+
+<ul id="cart-items">
+  <li>
+    <span>Marmita - P (Carne Suína) x1</span>
+    <strong>R$ 20,00</strong>
+  </li>
+  <li>
+    <span>Marmita - M (Carne Bovina (Bife)) x2</span>
+    <strong>R$ 56,00</strong>
+  </li>
+  <li>
+    <span>Coca-Cola 350ml x1</span>
+    <strong>R$ 8,00</strong>
+  </li>
+</ul>
+
+<!-- QUANDO O CLIENTE FINALIZA O PEDIDO -->
+<!-- A mensagem WhatsApp fica assim: -->
+
+Olá! Gostaria de fazer o seguinte pedido:
+
+Cliente: João Silva
+Itens: Marmita P (Carne Suína) x1, Marmita M (Carne Bovina (Bife)) x2, Coca-Cola 350ml x1
+Total: R$ 84,00
+Observações: Bem passado
+
+Pedido nº 42
+
+<!-- ESTRUTURA DO OBJETO ENVIADO PARA O SERVIDOR -->
+
+POST /api/orders
+Content-Type: application/json
+
+{
+  "customerName": "João Silva",
+  "customerPhone": "",
+  "notes": "Bem passado",
+  "items": [
+    {
+      "productId": 1,
+      "variantId": 2,
+      "productName": "Marmita",
+      "quantity": 1
+    },
+    {
+      "productId": 1,
+      "variantId": 5,
+      "productName": "Marmita",
+      "quantity": 2
+    },
+    {
+      "productId": 4,
+      "variantId": null,
+      "productName": "Coca-Cola 350ml",
+      "quantity": 1
+    }
+  ]
+}
+
+<!-- RESPOSTA DO SERVIDOR -->
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "success": true,
+  "orderId": 42,
+  "total": 84.00,
+  "whatsappUrl": "https://wa.me/554792637239?text=Ol%C3%A1..."
+}

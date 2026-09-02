@@ -1,88 +1,165 @@
 const express = require('express');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs');
+const { Pool } = require('pg');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const dataDir = path.join(__dirname, 'data');
-const dbPath = path.join(dataDir, 'salton.db');
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+// Configuração do pool PostgreSQL
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'salton_db',
+  password: process.env.DB_PASSWORD || 'password',
+  port: process.env.DB_PORT || 5432,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
 
-const db = new sqlite3.Database(dbPath);
-
-const initialProducts = [
-  { id: 1, name: 'Marmita P', category: 'marmita', size: 'P', price: 20.0, description: 'Porção ideal para 1 pessoa.' },
-  { id: 2, name: 'Marmita M', category: 'marmita', size: 'M', price: 24.0, description: 'Marmita de tamanho médio.' },
-  { id: 3, name: 'Marmita G', category: 'marmita', size: 'G', price: 32.0, description: 'Marmita grande para quem quer mais volume.' },
-  { id: 4, name: 'Coca-Cola 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Coca-Cola 2 litros.' },
-  { id: 5, name: 'Fanta 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Fanta 2 litros.' },
-  { id: 6, name: 'Coca-Cola 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Coca-Cola 350ml.' },
-  { id: 7, name: 'Fanta 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Fanta 350ml.' },
-  { id: 8, name: 'Coca-Cola 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola 200ml.' },
-  { id: 9, name: 'Coca-Cola Zero 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola Zero 200ml.' },
-  { id: 10, name: 'Fanta 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Fanta 200ml.' }
+// Tipos de carne disponíveis
+const meatTypes = [
+  { id: 1, name: 'Carne Bovina (Bife)', slug: 'bife' },
+  { id: 2, name: 'Carne Suína', slug: 'suina' },
+  { id: 3, name: 'Frango Milanesa', slug: 'frango_milanesa' },
+  { id: 4, name: 'Peixe', slug: 'peixe' }
 ];
 
-function initDatabase() {
-  db.serialize(() => {
-    db.run(`
+const initialProducts = [
+  { id: 1, name: 'Marmita', category: 'marmita', description: 'Marmita com sua escolha de carne', has_meat: true },
+  { id: 2, name: 'Coca-Cola 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Coca-Cola 2 litros.' },
+  { id: 3, name: 'Fanta 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Fanta 2 litros.' },
+  { id: 4, name: 'Coca-Cola 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Coca-Cola 350ml.' },
+  { id: 5, name: 'Fanta 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Fanta 350ml.' },
+  { id: 6, name: 'Coca-Cola 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola 200ml.' },
+  { id: 7, name: 'Coca-Cola Zero 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola Zero 200ml.' },
+  { id: 8, name: 'Fanta 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Fanta 200ml.' }
+];
+
+// Variações das marmitas (tamanho + tipo de carne)
+const initialVariants = [
+  // Marmita P
+  { product_id: 1, size: 'P', meat_type_id: 1, price: 22.0 },
+  { product_id: 1, size: 'P', meat_type_id: 2, price: 20.0 },
+  { product_id: 1, size: 'P', meat_type_id: 3, price: 18.0 },
+  { product_id: 1, size: 'P', meat_type_id: 4, price: 25.0 },
+  // Marmita M
+  { product_id: 1, size: 'M', meat_type_id: 1, price: 28.0 },
+  { product_id: 1, size: 'M', meat_type_id: 2, price: 26.0 },
+  { product_id: 1, size: 'M', meat_type_id: 3, price: 24.0 },
+  { product_id: 1, size: 'M', meat_type_id: 4, price: 30.0 },
+  // Marmita G
+  { product_id: 1, size: 'G', meat_type_id: 1, price: 35.0 },
+  { product_id: 1, size: 'G', meat_type_id: 2, price: 33.0 },
+  { product_id: 1, size: 'G', meat_type_id: 3, price: 31.0 },
+  { product_id: 1, size: 'G', meat_type_id: 4, price: 38.0 }
+];
+
+// Inicializar banco de dados
+async function initDatabase() {
+  try {
+    // Criar tabela de produtos
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        category TEXT NOT NULL,
-        size TEXT,
-        price REAL NOT NULL,
-        description TEXT
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        size VARCHAR(100),
+        price DECIMAL(10, 2),
+        description TEXT,
+        has_meat BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    db.run(`
+    // Criar tabela de tipos de carne
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS meat_types (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Criar tabela de variações de produtos (tamanho + tipo de carne)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS product_variants (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+        size VARCHAR(50),
+        meat_type_id INTEGER REFERENCES meat_types(id),
+        price DECIMAL(10, 2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Criar tabela de pedidos
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS orders (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        customer_name TEXT NOT NULL,
-        customer_phone TEXT,
+        id SERIAL PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        customer_phone VARCHAR(20),
         notes TEXT,
-        total REAL NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        total DECIMAL(10, 2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    db.run(`
+    // Criar tabela de itens do pedido
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS order_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        product_id INTEGER NOT NULL REFERENCES products(id),
+        variant_id INTEGER REFERENCES product_variants(id),
         quantity INTEGER NOT NULL,
-        unit_price REAL NOT NULL,
-        FOREIGN KEY(order_id) REFERENCES orders(id),
-        FOREIGN KEY(product_id) REFERENCES products(id)
+        unit_price DECIMAL(10, 2) NOT NULL,
+        meat_type_name VARCHAR(255),
+        size VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    const insertProduct = db.prepare(`
-      INSERT OR IGNORE INTO products (id, name, category, size, price, description)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-
-    initialProducts.forEach((product) => {
-      insertProduct.run(
-        product.id,
-        product.name,
-        product.category,
-        product.size,
-        product.price,
-        product.description
+    // Inserir tipos de carne se não existirem
+    for (const meat of meatTypes) {
+      await pool.query(
+        `INSERT INTO meat_types (id, name, slug) 
+         VALUES ($1, $2, $3) 
+         ON CONFLICT (slug) DO NOTHING`,
+        [meat.id, meat.name, meat.slug]
       );
-    });
+    }
 
-    insertProduct.finalize();
-  });
+    // Inserir produtos iniciais se não existirem
+    for (const product of initialProducts) {
+      await pool.query(
+        `INSERT INTO products (id, name, category, size, price, description, has_meat) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7) 
+         ON CONFLICT (id) DO NOTHING`,
+        [product.id, product.name, product.category, product.size || null, product.price || null, product.description, product.has_meat || false]
+      );
+    }
+
+    // Inserir variantes de marmitas se não existirem
+    for (const variant of initialVariants) {
+      await pool.query(
+        `INSERT INTO product_variants (product_id, size, meat_type_id, price) 
+         VALUES ($1, $2, $3, $4) 
+         ON CONFLICT DO NOTHING`,
+        [variant.product_id, variant.size, variant.meat_type_id, variant.price]
+      );
+    }
+
+    console.log('✓ Banco de dados inicializado com sucesso');
+  } catch (err) {
+    console.error('Erro ao inicializar banco de dados:', err);
+    process.exit(1);
+  }
 }
 
+// Configurar view engine e middlewares
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
@@ -91,12 +168,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 
+// Verificar conexão com banco de dados
+app.use(async (req, res, next) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    next();
+  } catch (err) {
+    console.error('Erro de conexão com banco de dados:', err.message);
+    res.status(503).send('Erro: Banco de dados indisponível. Verifique sua conexão PostgreSQL.');
+  }
+});
+
+// Rota principal
 app.get('/', async (req, res) => {
-  db.all('SELECT * FROM products ORDER BY category, id', (err, products) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Erro ao carregar cardápio.');
-    }
+  try {
+    const result = await pool.query(`
+      SELECT p.*, 
+             json_agg(json_build_object(
+               'id', pv.id, 
+               'size', pv.size, 
+               'meat_type_id', pv.meat_type_id,
+               'meat_type_name', mt.name,
+               'price', pv.price
+             )) FILTER (WHERE pv.id IS NOT NULL) as variants
+      FROM products p
+      LEFT JOIN product_variants pv ON p.id = pv.product_id
+      LEFT JOIN meat_types mt ON pv.meat_type_id = mt.id
+      GROUP BY p.id
+      ORDER BY p.category, p.id
+    `);
+    const products = result.rows;
 
     const groupedProducts = {
       marmita: products.filter((item) => item.category === 'marmita'),
@@ -106,96 +207,214 @@ app.get('/', async (req, res) => {
     res.render('index', {
       title: 'Salton Buffet & Marmitaria',
       products: groupedProducts,
-      whatsappNumber: '554792637239'
+      whatsappNumber: '554792637239',
+      meatTypes: meatTypes
     });
-  });
+  } catch (err) {
+    console.error('Erro ao carregar cardápio:', err);
+    res.status(500).send('Erro ao carregar cardápio. Tente novamente mais tarde.');
+  }
 });
 
-app.get('/api/products', (req, res) => {
-  db.all('SELECT * FROM products ORDER BY category, id', (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao consultar produtos.' });
-    }
-    res.json(rows);
-  });
+// API: Obter produtos
+app.get('/api/products', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT p.*, 
+             json_agg(json_build_object(
+               'id', pv.id, 
+               'size', pv.size, 
+               'meat_type_id', pv.meat_type_id,
+               'meat_type_name', mt.name,
+               'price', pv.price
+             )) FILTER (WHERE pv.id IS NOT NULL) as variants
+      FROM products p
+      LEFT JOIN product_variants pv ON p.id = pv.product_id
+      LEFT JOIN meat_types mt ON pv.meat_type_id = mt.id
+      GROUP BY p.id
+      ORDER BY p.category, p.id
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Erro ao consultar produtos:', err);
+    res.status(500).json({ error: 'Erro ao consultar produtos.' });
+  }
 });
 
-app.post('/api/orders', (req, res) => {
+// API: Obter variantes de um produto
+app.get('/api/products/:productId/variants', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const result = await pool.query(`
+      SELECT pv.id, pv.size, pv.meat_type_id, mt.name as meat_type_name, pv.price
+      FROM product_variants pv
+      LEFT JOIN meat_types mt ON pv.meat_type_id = mt.id
+      WHERE pv.product_id = $1
+      ORDER BY pv.size, pv.meat_type_id
+    `, [productId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Erro ao consultar variantes:', err);
+    res.status(500).json({ error: 'Erro ao consultar variantes.' });
+  }
+});
+
+// API: Obter tipos de carne
+app.get('/api/meat-types', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM meat_types ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Erro ao consultar tipos de carne:', err);
+    res.status(500).json({ error: 'Erro ao consultar tipos de carne.' });
+  }
+});
+
+// API: Criar pedido
+app.post('/api/orders', async (req, res) => {
   const { customerName, customerPhone, notes, items } = req.body;
 
   if (!customerName || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, message: 'Preencha nome e escolha pelo menos um item.' });
   }
 
-  let total = 0;
-  const validatedItems = [];
+  const client = await pool.connect();
 
-  items.forEach((item) => {
-    if (!item.productId || !item.quantity || item.quantity < 1) {
-      return;
-    }
+  try {
+    await client.query('BEGIN');
 
-    const { productId, quantity } = item;
+    // Validar e calcular total
+    let total = 0;
+    const validatedItems = [];
 
-    db.get('SELECT * FROM products WHERE id = ?', [productId], (err, product) => {
-      if (err || !product) {
-        return;
+    for (const item of items) {
+      if (!item.productId || !item.quantity || item.quantity < 1) {
+        continue;
       }
 
-      total += Number(product.price) * Number(quantity);
-      validatedItems.push({
-        productId: Number(productId),
-        quantity: Number(quantity),
-        unitPrice: Number(product.price),
-        productName: product.name
-      });
-    });
-  });
+      let productResult, variantId, meatTypeName, size, price;
 
-  setTimeout(() => {
+      // Se for variante de marmita (com carne)
+      if (item.variantId) {
+        const variantResult = await client.query(`
+          SELECT pv.id, pv.size, pv.price, pv.meat_type_id, mt.name as meat_type_name
+          FROM product_variants pv
+          LEFT JOIN meat_types mt ON pv.meat_type_id = mt.id
+          WHERE pv.id = $1
+        `, [item.variantId]);
+
+        if (variantResult.rows.length === 0) {
+          continue;
+        }
+
+        const variant = variantResult.rows[0];
+        variantId = variant.id;
+        meatTypeName = variant.meat_type_name;
+        size = variant.size;
+        price = variant.price;
+      } else {
+        // Produto comum (bebida)
+        productResult = await client.query('SELECT * FROM products WHERE id = $1', [item.productId]);
+
+        if (productResult.rows.length === 0) {
+          continue;
+        }
+
+        const product = productResult.rows[0];
+        variantId = null;
+        meatTypeName = null;
+        size = product.size;
+        price = product.price;
+      }
+
+      total += Number(price) * Number(item.quantity);
+      validatedItems.push({
+        productId: Number(item.productId),
+        variantId: variantId,
+        quantity: Number(item.quantity),
+        unitPrice: Number(price),
+        productName: item.productName,
+        meatTypeName: meatTypeName,
+        size: size
+      });
+    }
+
     if (validatedItems.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ success: false, message: 'Nenhum item válido foi selecionado.' });
     }
 
-    db.run(
-      `INSERT INTO orders (customer_name, customer_phone, notes, total) VALUES (?, ?, ?, ?)`,
-      [customerName.trim(), (customerPhone || '').toString().trim(), notes || '', Number(total.toFixed(2))],
-      function (err) {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ success: false, message: 'Erro ao salvar o pedido no banco.' });
-        }
-
-        const orderId = this.lastID;
-        const orderItemStmt = db.prepare(`
-          INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-          VALUES (?, ?, ?, ?)
-        `);
-
-        validatedItems.forEach((item) => {
-          orderItemStmt.run(orderId, item.productId, item.quantity, item.unitPrice);
-        });
-
-        orderItemStmt.finalize();
-
-        const summary = validatedItems.map(item => `${item.productName} x${item.quantity}`).join(', ');
-        const whatsappMessage = `Olá! Gostaria de fazer o seguinte pedido:\n\nCliente: ${customerName}\nItens: ${summary}\nTotal: R$ ${Number(total.toFixed(2)).toFixed(2)}\nObservações: ${notes || 'Nenhuma'}\n\nPedido nº ${orderId}`;
-
-        const encodedMessage = encodeURIComponent(whatsappMessage);
-        const whatsappUrl = `https://wa.me/554792637239?text=${encodedMessage}`;
-
-        res.json({
-          success: true,
-          orderId,
-          total: Number(total.toFixed(2)),
-          whatsappUrl
-        });
-      }
+    // Inserir pedido
+    const orderResult = await client.query(
+      `INSERT INTO orders (customer_name, customer_phone, notes, total) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id`,
+      [
+        customerName.trim(),
+        (customerPhone || '').toString().trim(),
+        notes || '',
+        Number(total.toFixed(2))
+      ]
     );
-  }, 100);
+
+    const orderId = orderResult.rows[0].id;
+
+    // Inserir itens do pedido
+    for (const item of validatedItems) {
+      await client.query(
+        `INSERT INTO order_items (order_id, product_id, variant_id, quantity, unit_price, meat_type_name, size) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [orderId, item.productId, item.variantId, item.quantity, item.unitPrice, item.meatTypeName, item.size]
+      );
+    }
+
+    await client.query('COMMIT');
+
+    // Preparar mensagem WhatsApp
+    const summary = validatedItems.map(item => {
+      if (item.meatTypeName) {
+        return `${item.productName} ${item.size} (${item.meatTypeName}) x${item.quantity}`;
+      }
+      return `${item.productName} x${item.quantity}`;
+    }).join(', ');
+    
+    const whatsappMessage = `Olá! Gostaria de fazer o seguinte pedido:\n\nCliente: ${customerName}\nItens: ${summary}\nTotal: R$ ${Number(total.toFixed(2)).toFixed(2)}\nObservações: ${notes || 'Nenhuma'}\n\nPedido nº ${orderId}`;
+
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    const whatsappUrl = `https://wa.me/554792637239?text=${encodedMessage}`;
+
+    res.json({
+      success: true,
+      orderId,
+      total: Number(total.toFixed(2)),
+      whatsappUrl
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Erro ao criar pedido:', err);
+    res.status(500).json({ success: false, message: 'Erro ao salvar o pedido no banco.' });
+  } finally {
+    client.release();
+  }
 });
 
-app.listen(PORT, () => {
-  initDatabase();
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+// Iniciar servidor
+async function startServer() {
+  await initDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`✓ Servidor rodando em http://localhost:${PORT}`);
+    console.log(`✓ Configuração PostgreSQL: ${process.env.DB_USER}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+  });
+}
+
+startServer().catch(err => {
+  console.error('Erro ao iniciar servidor:', err);
+  process.exit(1);
+});
+
+// Tratamento de erros não capturados
+process.on('unhandledRejection', (err) => {
+  console.error('Rejeição não tratada:', err);
+  process.exit(1);
 });
