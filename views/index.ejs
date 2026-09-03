@@ -59,12 +59,17 @@
         <div class="container">
           <div class="section-heading">
             <span class="eyebrow dark">Cardápio</span>
-            <h2>Escolha sua marmita ou bebida</h2>
+            <h2>Escolha sua marmita, bebida ou carne</h2>
           </div>
 
           <div class="tabs" aria-label="Categorias do cardápio">
             <button class="tab-btn active" data-tab="marmita" type="button">Marmitas</button>
             <button class="tab-btn" data-tab="bebida" type="button">Bebidas</button>
+            <button class="tab-btn" data-tab="carne" type="button">Carnes</button>
+          </div>
+
+          <div class="subtabs" aria-label="Opções de marmitas">
+            <button class="subtab-btn" data-tab="sabado" type="button">Sábado</button>
           </div>
 
           <div class="menu-grid" id="menuGrid">
@@ -75,7 +80,7 @@
                   <span class="size">P, M, G</span>
                 </div>
                 <h3><%= item.name %></h3>
-                <p><%= item.description %></p>
+                <p>P serve 1 pessoa; M serve 2 pessoas; G serve 3 pessoas. Acompanha uma porção de salada.</p>
                 <div class="product-footer">
                   <strong>A partir de R$ 18,00</strong>
                   <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>">Escolher</button>
@@ -83,10 +88,38 @@
               </article>
             <% }) %>
 
+            <article class="product-card hidden saturday-card" data-category="sabado">
+              <div class="product-top">
+                <span class="tag saturday">Sábado</span>
+                <span class="size">P, M, G</span>
+              </div>
+              <h3>Feijoada de Sábado</h3>
+              <p>Sábado é dia de Feijoada na Salton: acompanha torresmo e uma porção de laranja cortada. Escolha o tamanho da sua fome e peça direto pelo WhatsApp!</p>
+              <div class="product-footer">
+                <strong>Escolha o tamanho</strong>
+                <a class="add-btn" href="https://wa.me/554792637239?text=Ol%C3%A1%21%20Quero%20pedir%20a%20Feijoada%20de%20S%C3%A1bado.%20Tamanho%3A%20" target="_blank" rel="noopener">Pedir no WhatsApp</a>
+              </div>
+            </article>
+
             <% products.bebida.forEach((item) => { %>
               <article class="product-card hidden" data-category="bebida" data-product-id="<%= item.id %>">
                 <div class="product-top">
                   <span class="tag bebida">Bebida</span>
+                  <span class="size"><%= item.size %></span>
+                </div>
+                <h3><%= item.name %></h3>
+                <p><%= item.description %></p>
+                <div class="product-footer">
+                  <strong>R$ <%= Number(item.price).toFixed(2).replace('.', ',') %></strong>
+                  <button type="button" class="add-btn" data-id="<%= item.id %>" data-name="<%= item.name %>" data-price="<%= item.price %>" data-size="<%= item.size %>">Adicionar</button>
+                </div>
+              </article>
+            <% }) %>
+
+            <% products.carne.forEach((item) => { %>
+              <article class="product-card hidden" data-category="carne" data-product-id="<%= item.id %>">
+                <div class="product-top">
+                  <span class="tag carne">Carne</span>
                   <span class="size"><%= item.size %></span>
                 </div>
                 <h3><%= item.name %></h3>
@@ -147,7 +180,7 @@
 
     <footer class="footer">
       <div class="container footer-inner">
-        <p>© 2026 Salton Buffet & Marmitaria</p>
+        <p>© Salton Buffet & Marmitaria</p>
         <a href="https://wa.me/554792637239" target="_blank">WhatsApp: (47) 9263-7239</a>
       </div>
     </footer>

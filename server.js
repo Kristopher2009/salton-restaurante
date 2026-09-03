@@ -29,14 +29,20 @@ const meatTypes = [
 ];
 
 const initialProducts = [
-  { id: 1, name: 'Marmita', category: 'marmita', description: 'Marmita com sua escolha de carne', has_meat: true },
+  { id: 1, name: 'Marmita', category: 'marmita', description: 'P serve 1 pessoa; M serve 2 pessoas; G serve 3 pessoas. Acompanha uma porção de salada.', has_meat: true },
   { id: 2, name: 'Coca-Cola 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Coca-Cola 2 litros.' },
   { id: 3, name: 'Fanta 2L', category: 'bebida', size: '2 litros', price: 16.0, description: 'Refrigerante Fanta 2 litros.' },
   { id: 4, name: 'Coca-Cola 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Coca-Cola 350ml.' },
   { id: 5, name: 'Fanta 350ml', category: 'bebida', size: '350 ml', price: 8.0, description: 'Lata de Fanta 350ml.' },
   { id: 6, name: 'Coca-Cola 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola 200ml.' },
   { id: 7, name: 'Coca-Cola Zero 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Coca-Cola Zero 200ml.' },
-  { id: 8, name: 'Fanta 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Fanta 200ml.' }
+  { id: 8, name: 'Fanta 200ml', category: 'bebida', size: '200 ml', price: 3.0, description: 'Garrafa de Fanta 200ml.' },
+  { id: 9, name: 'Bife', category: 'carne', size: 'Porção', price: 2.0, description: 'Bife preparado na hora para acompanhar sua refeição. Acompanha uma porção de salada.' },
+  { id: 10, name: 'Sassame', category: 'carne', size: 'Porção', price: 2.0, description: 'Sassame dourado e crocante. Acompanha uma porção de salada.' },
+  { id: 11, name: 'Peixe', category: 'carne', size: 'Porção', price: 2.0, description: 'Peixe temperado e preparado na hora. Acompanha uma porção de salada.' },
+  { id: 12, name: 'Ovo', category: 'carne', size: 'Porção', price: 2.0, description: 'Ovo feito na hora para completar seu prato. Acompanha uma porção de salada.' },
+  { id: 13, name: 'Porco', category: 'carne', size: 'Porção', price: 2.0, description: 'Carne suína bem temperada e dourada. Acompanha uma porção de salada.' },
+  { id: 14, name: 'Carne de panela', category: 'carne', size: 'Porção', price: 2.0, description: 'Carne de panela macia e cheia de sabor. Acompanha uma porção de salada.' }
 ];
 
 // Variações das marmitas (tamanho + tipo de carne)
@@ -152,7 +158,13 @@ async function initDatabase() {
       await pool.query(
         `INSERT INTO products (id, name, category, size, price, description, has_meat) 
          VALUES ($1, $2, $3, $4, $5, $6, $7) 
-         ON CONFLICT (id) DO NOTHING`,
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           category = EXCLUDED.category,
+           size = EXCLUDED.size,
+           price = EXCLUDED.price,
+           description = EXCLUDED.description,
+           has_meat = EXCLUDED.has_meat`,
         [product.id, product.name, product.category, product.size || null, product.price || null, product.description, product.has_meat || false]
       );
     }
@@ -216,7 +228,8 @@ app.get('/', async (req, res) => {
 
     const groupedProducts = {
       marmita: products.filter((item) => item.category === 'marmita'),
-      bebida: products.filter((item) => item.category === 'bebida')
+      bebida: products.filter((item) => item.category === 'bebida'),
+      carne: products.filter((item) => item.category === 'carne')
     };
 
     res.render('index', {

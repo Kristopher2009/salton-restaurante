@@ -380,6 +380,38 @@ nav a {
   color: var(--black);
 }
 
+.tag.carne {
+  background: #4f6f52;
+  color: var(--white);
+}
+
+.tag.saturday {
+  background: var(--red-dark);
+  color: var(--gold);
+}
+
+.subtabs {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+.subtab-btn {
+  border: 1px solid var(--gold-dark);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--red-dark);
+  padding: 9px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.subtab-btn:hover,
+.subtab-btn.active {
+  background: var(--red);
+  color: var(--white);
+}
+
 .size {
   background: rgba(215, 166, 58, 0.15);
   color: var(--black);

@@ -100,6 +100,12 @@ const renderMenu = (category = 'marmita') => {
     } else if (category === 'bebida' && card.dataset.category === 'bebida') {
       filteredCards.push(card);
       card.classList.remove('hidden');
+    } else if (category === 'carne' && card.dataset.category === 'carne') {
+      filteredCards.push(card);
+      card.classList.remove('hidden');
+    } else if (category === 'sabado' && card.dataset.category === 'sabado') {
+      filteredCards.push(card);
+      card.classList.remove('hidden');
     } else {
       card.classList.add('hidden');
     }
@@ -111,7 +117,17 @@ document.querySelectorAll('.tab-btn').forEach((button) => {
   button.addEventListener('click', () => {
     const target = button.dataset.tab;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === button));
+    const subtabs = document.querySelector('.subtabs');
+    if (subtabs) subtabs.hidden = target !== 'marmita';
+    document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.remove('active'));
     renderMenu(target);
+  });
+});
+
+document.querySelectorAll('.subtab-btn').forEach((button) => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.toggle('active', btn === button));
+    renderMenu(button.dataset.tab);
   });
 });
 
@@ -122,11 +138,17 @@ document.addEventListener('click', (event) => {
     const productId = card.dataset.productId;
     const category = card.dataset.category;
 
+    if (category === 'sabado') {
+      event.preventDefault();
+      window.location.assign(event.target.href);
+      return;
+    }
+
     if (category === 'marmita') {
       // Mostrar modal/seletor para marmita
       showMeatAndSizeSelector(productId);
     } else {
-      // Bebida - adicionar diretamente
+      // Bebidas e carnes - adicionar diretamente
       const { id, name, price } = event.target.dataset;
       addItemToCart(null, name, Number(price), null, event.target.dataset.size, Number(id));
     }
@@ -159,7 +181,7 @@ function showMeatAndSizeSelector(productId) {
       <div class="size-selector">
         <label>Tamanho:</label>
         <select id="size-select">
-          ${sizes.map(size => `<option value="${size}">${size}</option>`).join('')}
+          ${sizes.map(size => `<option value="${size}">${size} - ${size === 'G' ? '4' : '2'} pedaços de carne</option>`).join('')}
         </select>
       </div>
 
