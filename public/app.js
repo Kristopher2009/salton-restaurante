@@ -53,8 +53,19 @@ const updateCart = () => {
       const sizeInfo = item.size ? ` - ${item.size}` : '';
       return `
         <li>
-          <span>${item.name}${sizeInfo}${meatInfo} x${item.quantity}</span>
-          <strong>${formatCurrency(item.quantity * item.price)}</strong>
+          <div class="cart-item-info">
+            <span>${item.name}${sizeInfo}${meatInfo}</span>
+            <small>${formatCurrency(item.price)} cada</small>
+          </div>
+          <div class="cart-item-actions">
+            <div class="quantity-control" aria-label="Quantidade de ${item.name}">
+              <button type="button" class="quantity-btn" data-cart-action="decrease" data-cart-key="${id}" aria-label="Diminuir quantidade">−</button>
+              <span aria-live="polite">${item.quantity}</span>
+              <button type="button" class="quantity-btn" data-cart-action="increase" data-cart-key="${id}" aria-label="Aumentar quantidade">+</button>
+            </div>
+            <strong>${formatCurrency(item.quantity * item.price)}</strong>
+            <button type="button" class="remove-btn" data-cart-action="remove" data-cart-key="${id}">Remover</button>
+          </div>
         </li>
       `;
     })
@@ -83,6 +94,10 @@ const addItemToCart = (variantId, name, price, meatType, size, productId) => {
   }
 
   updateCart();
+  const cartStatus = document.getElementById('cart-status');
+  if (cartStatus) {
+    cartStatus.textContent = `${name}${size ? ` ${size}` : ''} foi adicionado ao seu pedido.`;
+  }
 };
 
 // Renderizar produtos com seletor de carne para marmitas
@@ -116,7 +131,11 @@ const renderMenu = (category = 'marmita') => {
 document.querySelectorAll('.tab-btn').forEach((button) => {
   button.addEventListener('click', () => {
     const target = button.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === button));
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const isActive = btn === button;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive);
+    });
     const subtabs = document.querySelector('.subtabs');
     if (subtabs) subtabs.hidden = target !== 'marmita';
     document.querySelectorAll('.subtab-btn').forEach(btn => btn.classList.remove('active'));
@@ -133,6 +152,26 @@ document.querySelectorAll('.subtab-btn').forEach((button) => {
 
 // Delegação de eventos para seletor de carne e botão de adicionar
 document.addEventListener('click', (event) => {
+  const cartAction = event.target.closest('[data-cart-action]');
+  if (cartAction) {
+    const cartKey = cartAction.dataset.cartKey;
+    const item = selectedItems.get(cartKey);
+
+    if (!item) return;
+
+    if (cartAction.dataset.cartAction === 'increase') {
+      item.quantity += 1;
+    } else if (cartAction.dataset.cartAction === 'decrease') {
+      item.quantity -= 1;
+      if (item.quantity <= 0) selectedItems.delete(cartKey);
+    } else if (cartAction.dataset.cartAction === 'remove') {
+      selectedItems.delete(cartKey);
+    }
+
+    updateCart();
+    return;
+  }
+
   if (event.target.classList.contains('add-btn')) {
     const card = event.target.closest('.product-card');
     const productId = card.dataset.productId;
@@ -174,9 +213,13 @@ function showMeatAndSizeSelector(productId) {
   // Criar modal
   const modal = document.createElement('div');
   modal.className = 'meat-selector-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'meat-selector-title');
   modal.innerHTML = `
     <div class="meat-selector-content">
-      <h3>Escolha o Tamanho e Tipo de Carne</h3>
+      <button type="button" class="modal-close" aria-label="Fechar seleção">×</button>
+      <h3 id="meat-selector-title">Escolha o Tamanho e Tipo de Carne</h3>
       
       <div class="size-selector">
         <label>Tamanho:</label>
@@ -199,6 +242,13 @@ function showMeatAndSizeSelector(productId) {
   `;
 
   document.body.appendChild(modal);
+
+  const closeModal = () => modal.remove();
+  const closeButton = modal.querySelector('.modal-close');
+  closeButton.addEventListener('click', closeModal);
+  modal.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeModal();
+  });
 
   const meatTabs = document.getElementById('meat-tabs');
   const selectedMeat = document.getElementById('selected-meat');
@@ -248,18 +298,20 @@ function showMeatAndSizeSelector(productId) {
     const size = sizeSelect.value;
 
     addItemToCart(variantId, 'Marmita', price, meatType, size, productId);
-    modal.remove();
+    closeModal();
   });
 
   // Cancelar
   document.getElementById('cancel-btn').addEventListener('click', () => {
-    modal.remove();
+    closeModal();
   });
 
   // Fechar ao clicar fora
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
+    if (e.target === modal) closeModal();
   });
+
+  closeButton.focus();
 }
 
 // Enviar pedido
